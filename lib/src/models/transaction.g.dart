@@ -108,3 +108,62 @@ Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
       'signatures': instance.signatures,
       'context_free_data': instance.contextFreeData
     };
+
+TransactionCommitted _$TransactionCommittedFromJson(Map<String, dynamic> json) {
+  return TransactionCommitted()
+    ..id = json['transaction_id'] as String
+    ..processed = json['processed'] == null
+        ? null
+        : TransactionProcessed.fromJson(
+            json['processed'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$TransactionCommittedToJson(
+        TransactionCommitted instance) =>
+    <String, dynamic>{
+      'transaction_id': instance.id,
+      'processed': instance.processed
+    };
+
+TransactionProcessed _$TransactionProcessedFromJson(Map<String, dynamic> json) {
+  return TransactionProcessed()
+    ..id = json['id'] as String
+    ..blockNum = json['block_num'] == null
+        ? null
+        : ConversionHelper.getIntFromJson(json['block_num'])
+    ..blockTime = json['block_time'] == null
+        ? null
+        : DateTime.parse(json['block_time'] as String)
+    ..producerBlockId = json['producer_block_id'] == null
+        ? null
+        : ConversionHelper.getIntFromJson(json['producer_block_id'])
+    ..receipt = json['receipt'] == null
+        ? null
+        : TransactionReceipt.fromJson(json['receipt'] as Map<String, dynamic>)
+    ..elapsed = json['elapsed'] == null
+        ? null
+        : ConversionHelper.getIntFromJson(json['elapsed'])
+    ..netUsage = json['net_usage'] == null
+        ? null
+        : ConversionHelper.getIntFromJson(json['net_usage'])
+    ..scheduled = json['scheduled'] as bool
+    ..actionTraces = (json['action_traces'] as List)
+        ?.map((e) => e == null
+            ? null
+            : ActionWithReceipt.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+}
+
+Map<String, dynamic> _$TransactionProcessedToJson(
+        TransactionProcessed instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'block_num': instance.blockNum,
+      'block_time': instance.blockTime?.toIso8601String(),
+      'producer_block_id': instance.producerBlockId,
+      'receipt': instance.receipt,
+      'elapsed': instance.elapsed,
+      'net_usage': instance.netUsage,
+      'scheduled': instance.scheduled,
+      'action_traces': instance.actionTraces
+    };
