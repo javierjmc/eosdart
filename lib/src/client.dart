@@ -18,8 +18,66 @@ import 'eosdart_base.dart';
 import 'jsons.dart';
 import 'serialize.dart' as ser;
 
+abstract class EOSIOClient {
+  Future<NodeInfo> getInfo();
+
+  Future<List<Map<String, dynamic>>> getTableRows(
+    String code,
+    String scope,
+    String table, {
+    bool json,
+    String tableKey,
+    String lower,
+    String upper,
+    int indexPosition,
+    String keyType,
+    int limit,
+    bool reverse,
+  });
+
+  Future<Map<String, dynamic>> getTableRow(
+    String code,
+    String scope,
+    String table, {
+    bool json,
+    String tableKey,
+    String lower,
+    String upper,
+    int indexPosition,
+    String keyType,
+    bool reverse,
+  });
+
+  Future<Block> getBlock(String blockNumOrId);
+
+  Future<BlockHeaderState> getBlockHeaderState(String blockNumOrId);
+
+  Future<AbiResp> getAbi(String accountName);
+
+  Future<AbiResp> getRawAbi(String accountName);
+
+  Future<AbiResp> getRawCodeAndAbi(String accountName);
+
+  Future<Account> getAccount(String accountName);
+
+  Future<List<Holding>> getCurrencyBalance(String code, String account,
+      [String symbol]);
+
+  Future<RequiredKeys> getRequiredKeys(
+      Transaction transaction, List<String> availableKeys);
+
+  Future<Actions> getActions(String accountName, {int pos, int offset});
+
+  Future<TransactionBlock> getTransaction(String id, {int blockNumHint});
+
+  Future<AccountNames> getKeyAccounts(String pubKey);
+
+  Future<dynamic> pushTransaction(Transaction transaction,
+      {bool broadcast, bool sign, int blocksBehind, int expireSecond});
+}
+
 /// EOSClient calls APIs against given EOS nodes
-class EOSClient {
+class EOSClient extends EOSIOClient {
   final String _nodeURL;
   final String _version;
   int expirationInSec;
@@ -67,6 +125,7 @@ class EOSClient {
   }
 
   /// Get EOS Node Info
+  @override
   Future<NodeInfo> getInfo() async {
     return this._post('/chain/get_info', {}).then((nodeInfo) {
       NodeInfo info = NodeInfo.fromJson(nodeInfo);
@@ -75,6 +134,7 @@ class EOSClient {
   }
 
   /// Get table rows (eosio get table ...)
+  @override
   Future<List<Map<String, dynamic>>> getTableRows(
     String code,
     String scope,
@@ -108,6 +168,7 @@ class EOSClient {
   }
 
   /// Get table row (eosio get table ...)
+  @override
   Future<Map<String, dynamic>> getTableRow(
     String code,
     String scope,
@@ -138,6 +199,7 @@ class EOSClient {
   }
 
   /// Get EOS Block Info
+  @override
   Future<Block> getBlock(String blockNumOrId) async {
     return this._post(
         '/chain/get_block', {'block_num_or_id': blockNumOrId}).then((block) {
@@ -146,6 +208,7 @@ class EOSClient {
   }
 
   /// Get EOS Block Header State
+  @override
   Future<BlockHeaderState> getBlockHeaderState(String blockNumOrId) async {
     return this._post('/chain/get_block_header_state',
         {'block_num_or_id': blockNumOrId}).then((block) {
@@ -154,6 +217,7 @@ class EOSClient {
   }
 
   /// Get EOS abi from account name
+  @override
   Future<AbiResp> getAbi(String accountName) async {
     return this
         ._post('/chain/get_abi', {'account_name': accountName}).then((abi) {
@@ -162,6 +226,7 @@ class EOSClient {
   }
 
   /// Get EOS raw abi from account name
+  @override
   Future<AbiResp> getRawAbi(String accountName) async {
     return this
         ._post('/chain/get_raw_abi', {'account_name': accountName}).then((abi) {
@@ -170,6 +235,7 @@ class EOSClient {
   }
 
   /// Get EOS raw code and abi from account name
+  @override
   Future<AbiResp> getRawCodeAndAbi(String accountName) async {
     return this._post('/chain/get_raw_code_and_abi',
         {'account_name': accountName}).then((abi) {
@@ -178,6 +244,7 @@ class EOSClient {
   }
 
   /// Get EOS account info form the given account name
+  @override
   Future<Account> getAccount(String accountName) async {
     return this._post('/chain/get_account', {'account_name': accountName}).then(
         (account) {
@@ -186,6 +253,7 @@ class EOSClient {
   }
 
   /// Get EOS account info form the given account name
+  @override
   Future<List<Holding>> getCurrencyBalance(String code, String account,
       [String symbol]) async {
     return this._post('/chain/get_currency_balance',
@@ -195,6 +263,7 @@ class EOSClient {
   }
 
   /// Get required key by transaction from EOS blockchain
+  @override
   Future<RequiredKeys> getRequiredKeys(
       Transaction transaction, List<String> availableKeys) async {
     NodeInfo info = await getInfo();
@@ -214,6 +283,7 @@ class EOSClient {
   }
 
   /// Get EOS account actions
+  @override
   Future<Actions> getActions(String accountName, {int pos, int offset}) async {
     return this._post('/history/get_actions', {
       'account_name': accountName,
@@ -225,6 +295,7 @@ class EOSClient {
   }
 
   /// Get EOS transaction
+  @override
   Future<TransactionBlock> getTransaction(String id, {int blockNumHint}) async {
     return this._post('/history/get_transaction',
         {'id': id, 'block_num_hint': blockNumHint}).then((transaction) {
@@ -233,6 +304,7 @@ class EOSClient {
   }
 
   /// Get Key Accounts
+  @override
   Future<AccountNames> getKeyAccounts(String pubKey) async {
     return this._post('/history/get_key_accounts', {'public_key': pubKey}).then(
         (accountNames) {
@@ -241,6 +313,7 @@ class EOSClient {
   }
 
   /// Push transaction to EOS chain
+  @override
   Future<dynamic> pushTransaction(Transaction transaction,
       {bool broadcast = true,
       bool sign = true,
