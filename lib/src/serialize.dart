@@ -21,7 +21,7 @@ class SerializerState {
 
   SerializerState(
       {this.options = const SerializerOptions(false),
-      this.skippedBinaryExtension = false});
+        this.skippedBinaryExtension = false});
 }
 
 /// Serialize and deserialize data */
@@ -114,7 +114,7 @@ class SerialBuffer {
       throw 'Read past end of buffer';
     }
     var result =
-        Uint8List.view(array.buffer, array.offsetInBytes + readPos, len);
+    Uint8List.view(array.buffer, array.offsetInBytes + readPos, len);
     readPos += len;
     return result;
   }
@@ -212,24 +212,24 @@ class SerialBuffer {
   }
 
   // /** Append a `float32` */
-  // void pushFloat32(double v) {
-  //     pushArray(Uint8List.fromList(Float32List.fromList([v])));
-  // }
+  void pushFloat32(double v) {
+    pushArray(Float32List.fromList([v]).buffer.asUint8List());
+  }
 
   // /** Get a `float32` */
-  // double getFloat32() {
-  //     return Float32List(getUint8List(4).slice().buffer)[0];
-  // }
+  double getFloat32() {
+    return getUint8List(4).buffer.asFloat32List()[0];
+  }
 
   // /** Append a `float64` */
-  // void pushFloat64(int v) {
-  //     pushArray(Uint8List.fromList(Float64List.fromList([v])));
-  // }
+  void pushFloat64(double v) {
+    pushArray(Float64List.fromList([v]).buffer.asUint8List());
+  }
 
   // /** Get a `float64` */
-  // public getFloat64() {
-  //     return new Float64Array(getUint8List(8).slice().buffer)[0];
-  // }
+  double getFloat64() {
+    return getUint8List(8).buffer.asFloat64List()[0];
+  }
 
   /// Append a `name` */
   void pushName(String s) {
@@ -450,18 +450,18 @@ class SerialBuffer {
 
 Type createType(
     {String name = '<missing name>',
-    String aliasOfName = "",
-    Type arrayOf,
-    Type optionalOf,
-    void Function(Type self, SerialBuffer buffer, Object data,
-            {SerializerState state, bool allowExtensions})
-        serialize,
-    Object Function(Type self, SerialBuffer buffer,
-            {SerializerState state, bool allowExtensions})
-        deserialize,
-    String baseName: "",
-    List<Field> fields: const [],
-    Type extensionOf}) {
+      String aliasOfName = "",
+      Type arrayOf,
+      Type optionalOf,
+      void Function(Type self, SerialBuffer buffer, Object data,
+          {SerializerState state, bool allowExtensions})
+      serialize,
+      Object Function(Type self, SerialBuffer buffer,
+          {SerializerState state, bool allowExtensions})
+      deserialize,
+      String baseName: "",
+      List<Field> fields: const [],
+      Type extensionOf}) {
   var t = Type(
       aliasOfName: aliasOfName,
       name: name,
@@ -560,9 +560,9 @@ String timePointSecToDate(int sec) {
 /// Convert date in ISO format to `block_timestamp_type` (half-seconds since a different epoch) */
 int dateToBlockTimestamp(String date) {
   return ((checkDateParse(date + 'Z')
-                  .subtract(Duration(milliseconds: 946684800000)))
-              .millisecondsSinceEpoch /
-          500)
+      .subtract(Duration(milliseconds: 946684800000)))
+      .millisecondsSinceEpoch /
+      500)
       .round();
 }
 
@@ -610,7 +610,7 @@ void serializeStruct(Type self, SerialBuffer buffer, Object data,
       field.type.serialize(field.type, buffer, dy[field.name],
           state: state,
           allowExtensions:
-              allowExtensions && field == self.fields[self.fields.length - 1]);
+          allowExtensions && field == self.fields[self.fields.length - 1]);
     } else {
       if (allowExtensions && field.type.extensionOf != null) {
         state.skippedBinaryExtension = true;
@@ -804,20 +804,20 @@ Map<String, Type> createInitialTypes() {
         return numeric.signedBinaryToDecimal(buffer.getUint8List(16));
       },
     ),
-    // "float32": createType(
-    //     name: 'float32',
-    //     serialize:(Type self,SerialBuffer buffer ,Object data,{SerializerState state,bool allowExtensions}) {
-    //       buffer.pushFloat32(data); },
-    //     deserialize:(Type self,SerialBuffer buffer,{SerializerState state,bool allowExtensions}) {
-    //       return buffer.getFloat32(); },
-    // ),
-    // "float64": createType(
-    //     name: 'float64',
-    //     serialize:(Type self,SerialBuffer buffer ,Object data,{SerializerState state,bool allowExtensions}) {
-    //       buffer.pushFloat64(data); },
-    //     deserialize:(Type self,SerialBuffer buffer,{SerializerState state,bool allowExtensions}) {
-    //       return buffer.getFloat64(); },
-    // ),
+    "float32": createType(
+      name: 'float32',
+      serialize:(Type self,SerialBuffer buffer ,Object data,{SerializerState state,bool allowExtensions}) {
+        buffer.pushFloat32(data); },
+      deserialize:(Type self,SerialBuffer buffer,{SerializerState state,bool allowExtensions}) {
+        return buffer.getFloat32(); },
+    ),
+    "float64": createType(
+      name: 'float64',
+      serialize:(Type self,SerialBuffer buffer ,Object data,{SerializerState state,bool allowExtensions}) {
+        buffer.pushFloat64(data); },
+      deserialize:(Type self,SerialBuffer buffer,{SerializerState state,bool allowExtensions}) {
+        return buffer.getFloat64(); },
+    ),
     "float128": createType(
       name: 'float128',
       serialize: (Type self, SerialBuffer buffer, Object data,
@@ -1168,7 +1168,7 @@ Map<String, Type> getTypesFromAbi(Map<String, Type> initialTypes, Abi abi) {
           baseName: str.base,
           fields: str.fields
               ?.map((item) =>
-                  Field(name: item.name, typeName: item.type, type: null))
+              Field(name: item.name, typeName: item.type, type: null))
               ?.toList(),
           serialize: serializeStruct,
           deserialize: deserializeStruct);
